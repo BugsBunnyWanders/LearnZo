@@ -39,9 +39,7 @@ def test_onboard_learner_and_initialize_skill_states(
         assert skill["evidence_count"] == 0
 
 
-def test_get_learner_profile_and_skills(
-    client: TestClient, db_session: Session
-) -> None:
+def test_get_learner_profile_and_skills(client: TestClient, db_session: Session) -> None:
     """Test fetching learner profile and skills via GET endpoints."""
     CurriculumService(db_session).seed_curriculum(force=True)
 
@@ -63,21 +61,23 @@ def test_get_learner_profile_and_skills(
     assert len(skills) == 7
 
 
-def test_record_evidence_and_update_mastery(
-    client: TestClient, db_session: Session
-) -> None:
+def test_record_evidence_and_update_mastery(client: TestClient, db_session: Session) -> None:
     """Test recording evidence updates mastery and confidence calculations."""
     CurriculumService(db_session).seed_curriculum(force=True)
     service = LearnerService(db_session)
 
     profile = service.onboard_learner(
-        data=type("LearnerCreate", (), {
-            "name": "Charlie",
-            "email": "charlie@example.com",
-            "target_role": "Backend SDE2",
-            "target_mastery": 0.85,
-            "experience_level": "Junior SDE",
-        })()
+        data=type(
+            "LearnerCreate",
+            (),
+            {
+                "name": "Charlie",
+                "email": "charlie@example.com",
+                "target_role": "Backend SDE2",
+                "target_mastery": 0.85,
+                "experience_level": "Junior SDE",
+            },
+        )()
     )
     learner_id = profile.learner.id
 
@@ -122,4 +122,3 @@ def test_nonexistent_learner_returns_404(client: TestClient) -> None:
     """Test 404 when querying unknown learner."""
     response = client.get("/api/v1/learners/learner_unknown_123")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-

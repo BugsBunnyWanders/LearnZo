@@ -16,9 +16,7 @@ def setup_curriculum_and_diagnostic(db_session: Session) -> None:
     DiagnosticService(db_session).seed_questions(force=True)
 
 
-def test_get_diagnostic_questions_sanitized(
-    client: TestClient, db_session: Session
-) -> None:
+def test_get_diagnostic_questions_sanitized(client: TestClient, db_session: Session) -> None:
     """Test fetching diagnostic questions returns sanitized payloads without answers."""
     setup_curriculum_and_diagnostic(db_session)
 
@@ -39,9 +37,7 @@ def test_get_diagnostic_questions_sanitized(
         assert "explanation" not in q
 
 
-def test_diagnostic_end_to_end_flow(
-    client: TestClient, db_session: Session
-) -> None:
+def test_diagnostic_end_to_end_flow(client: TestClient, db_session: Session) -> None:
     """Test full diagnostic journey: start -> answer -> grade -> evidence -> updated skill profile."""
     setup_curriculum_and_diagnostic(db_session)
 
@@ -77,16 +73,16 @@ def test_diagnostic_end_to_end_flow(
             {"question_id": "dq_sql_2", "selected_option_id": "B"},  # Correct
             {"question_id": "dq_idx_1", "selected_option_id": "C"},  # Correct
             {"question_id": "dq_idx_2", "selected_option_id": "A"},  # Incorrect (correct is B)
-            {"question_id": "dq_tx_1", "selected_option_id": "B"},   # Correct
-            {"question_id": "dq_tx_2", "selected_option_id": "B"},   # Correct
-            {"question_id": "dq_cache_1", "selected_option_id": "B"},# Correct
-            {"question_id": "dq_cache_2", "selected_option_id": "A"},# Correct
-            {"question_id": "dq_dist_1", "selected_option_id": "B"}, # Correct
-            {"question_id": "dq_dist_2", "selected_option_id": "C"}, # Correct
+            {"question_id": "dq_tx_1", "selected_option_id": "B"},  # Correct
+            {"question_id": "dq_tx_2", "selected_option_id": "B"},  # Correct
+            {"question_id": "dq_cache_1", "selected_option_id": "B"},  # Correct
+            {"question_id": "dq_cache_2", "selected_option_id": "A"},  # Correct
+            {"question_id": "dq_dist_1", "selected_option_id": "B"},  # Correct
+            {"question_id": "dq_dist_2", "selected_option_id": "C"},  # Correct
             {"question_id": "dq_msg_1", "selected_option_id": "B"},  # Correct
             {"question_id": "dq_msg_2", "selected_option_id": "C"},  # Incorrect (correct is B)
-            {"question_id": "dq_sd_1", "selected_option_id": "A"},   # Correct
-            {"question_id": "dq_sd_2", "selected_option_id": "B"},   # Correct
+            {"question_id": "dq_sd_1", "selected_option_id": "A"},  # Correct
+            {"question_id": "dq_sd_2", "selected_option_id": "B"},  # Correct
         ]
     }
 
@@ -128,15 +124,11 @@ def test_diagnostic_end_to_end_flow(
     assert len(ev_data) == 7  # 1 evidence item generated per assessed skill dimension
 
 
-def test_cannot_submit_completed_attempt(
-    client: TestClient, db_session: Session
-) -> None:
+def test_cannot_submit_completed_attempt(client: TestClient, db_session: Session) -> None:
     """Test submitting an already completed attempt raises an error."""
     setup_curriculum_and_diagnostic(db_session)
     learner_service = LearnerService(db_session)
-    profile = learner_service.onboard_learner(
-        LearnerCreate(name="Eve", email="eve@example.com")
-    )
+    profile = learner_service.onboard_learner(LearnerCreate(name="Eve", email="eve@example.com"))
 
     start_res = client.post("/api/v1/diagnostics/start", json={"learner_id": profile.learner.id})
     attempt_id = start_res.json()["id"]
@@ -151,5 +143,7 @@ def test_cannot_submit_completed_attempt(
         f"/api/v1/diagnostics/{attempt_id}/submit",
         json={"answers": [{"question_id": "dq_sql_1", "selected_option_id": "B"}]},
     )
-    assert retry_res.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR or retry_res.status_code == status.HTTP_400_BAD_REQUEST
-
+    assert (
+        retry_res.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        or retry_res.status_code == status.HTTP_400_BAD_REQUEST
+    )

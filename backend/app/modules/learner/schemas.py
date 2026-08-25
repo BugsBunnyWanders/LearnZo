@@ -1,7 +1,8 @@
 """Pydantic schemas for Learner profiles, skill states, and skill evidence."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -11,8 +12,12 @@ class LearnerCreate(BaseModel):
     name: str = Field(min_length=1, max_length=150, description="Learner full name")
     email: str = Field(min_length=3, max_length=255, description="Learner email address")
     target_role: str = Field(default="Backend SDE2", description="Target engineering role")
-    target_mastery: float = Field(default=0.85, ge=0.5, le=1.0, description="Target mastery score (0.5 - 1.0)")
-    experience_level: str = Field(default="Mid-level SDE", description="Self-reported experience level")
+    target_mastery: float = Field(
+        default=0.85, ge=0.5, le=1.0, description="Target mastery score (0.5 - 1.0)"
+    )
+    experience_level: str = Field(
+        default="Mid-level SDE", description="Self-reported experience level"
+    )
 
 
 class LearnerRead(BaseModel):
@@ -36,14 +41,14 @@ class SkillEvidenceRead(BaseModel):
     id: str
     learner_id: str
     skill_id: str
-    skill_name: Optional[str] = None
+    skill_name: str | None = None
     source_type: str
     source_id: str
     score: float
     confidence: float
     weight: float
     evidence_summary: str
-    metadata_json: Optional[Dict[str, Any]] = None
+    metadata_json: dict[str, Any] | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -71,6 +76,5 @@ class LearnerProfileSummary(BaseModel):
     overall_readiness_percentage: float = Field(
         description="Overall target role readiness score (0.0% to 100.0%)"
     )
-    skills: List[LearnerSkillStateRead]
-    recent_evidence: List[SkillEvidenceRead] = []
-
+    skills: list[LearnerSkillStateRead]
+    recent_evidence: list[SkillEvidenceRead] = []

@@ -2,7 +2,8 @@
 
 import uuid
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any
+
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -36,7 +37,7 @@ class DiagnosticQuestion(Base, TimestampMixin):
     question_text: Mapped[str] = mapped_column(Text, nullable=False)
     difficulty: Mapped[str] = mapped_column(String(50), default="medium", nullable=False)
     difficulty_weight: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
-    options_json: Mapped[List[dict[str, Any]]] = mapped_column(JSON, nullable=False)
+    options_json: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False)
     correct_option_id: Mapped[str] = mapped_column(String(10), nullable=False)
     explanation: Mapped[str] = mapped_column(Text, nullable=False)
     order_index: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -71,14 +72,14 @@ class DiagnosticAttempt(Base, TimestampMixin):
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     learner: Mapped["app.modules.learner.models.Learner"] = relationship(  # noqa: F821
         "Learner",
         lazy="joined",
     )
-    answers: Mapped[List["DiagnosticAnswer"]] = relationship(
+    answers: Mapped[list["DiagnosticAnswer"]] = relationship(
         "DiagnosticAnswer",
         back_populates="attempt",
         cascade="all, delete-orphan",
@@ -92,7 +93,10 @@ class DiagnosticAnswer(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     attempt_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("diagnostic_attempts.id", ondelete="CASCADE"), nullable=False, index=True
+        String(50),
+        ForeignKey("diagnostic_attempts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     question_id: Mapped[str] = mapped_column(
         String(50), ForeignKey("diagnostic_questions.id"), nullable=False, index=True
@@ -104,6 +108,7 @@ class DiagnosticAnswer(Base, TimestampMixin):
     )
 
     # Relationships
-    attempt: Mapped["DiagnosticAttempt"] = relationship("DiagnosticAttempt", back_populates="answers")
+    attempt: Mapped["DiagnosticAttempt"] = relationship(
+        "DiagnosticAttempt", back_populates="answers"
+    )
     question: Mapped["DiagnosticQuestion"] = relationship("DiagnosticQuestion", lazy="joined")
-

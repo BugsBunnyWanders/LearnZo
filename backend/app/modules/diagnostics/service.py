@@ -2,8 +2,8 @@
 
 import logging
 from collections import defaultdict
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from datetime import UTC, datetime
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundException, LearnZoException
@@ -39,18 +39,15 @@ class DiagnosticService:
         self.learner_repo = LearnerRepository(db)
         self.learner_service = LearnerService(db)
 
-    def list_questions_public(
-        self, skill_id: Optional[str] = None
-    ) -> List[DiagnosticQuestionPublic]:
+    def list_questions_public(self, skill_id: str | None = None) -> list[DiagnosticQuestionPublic]:
         """Fetch sanitized diagnostic questions suitable for presenting to the learner."""
         questions = self.repo.list_active_questions(skill_id=skill_id)
-        results: List[DiagnosticQuestionPublic] = []
+        results: list[DiagnosticQuestionPublic] = []
 
         for q in questions:
             # Strip correct answers and explanations for safety
             public_options = [
-                DiagnosticOptionPublic(id=opt["id"], text=opt["text"])
-                for opt in q.options_json
+                DiagnosticOptionPublic(id=opt["id"], text=opt["text"]) for opt in q.options_json
             ]
             results.append(
                 DiagnosticQuestionPublic(
@@ -73,7 +70,9 @@ class DiagnosticService:
 
         active_questions = self.repo.list_active_questions()
         if not active_questions:
-            raise LearnZoException("No active diagnostic questions available. Please seed questions first.")
+            raise LearnZoException(
+                "No active diagnostic questions available. Please seed questions first."
+            )
 
         attempt = DiagnosticAttempt(
             learner_id=learner_id,
@@ -81,7 +80,7 @@ class DiagnosticService:
             total_questions=len(active_questions),
             correct_count=0,
             score_percentage=0.0,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         self.repo.create_attempt(attempt)
         self.db.commit()
@@ -98,17 +97,19 @@ class DiagnosticService:
             raise EntityNotFoundException("DiagnosticAttempt", attempt_id)
 
         if attempt.status == "completed":
-            raise LearnZoException("This diagnostic attempt has already been submitted and completed.")
+            raise LearnZoException(
+                "This diagnostic attempt has already been submitted and completed."
+            )
 
         question_ids = [a.question_id for a in payload.answers]
         questions = {q.id: q for q in self.repo.get_questions_by_ids(question_ids)}
 
-        answers_to_insert: List[DiagnosticAnswer] = []
-        detailed_answers: List[QuestionAnswerResult] = []
+        answers_to_insert: list[DiagnosticAnswer] = []
+        detailed_answers: list[QuestionAnswerResult] = []
 
         # Track per-skill grading
         # skill_id -> {"total": int, "correct": int, "weighted_total": float, "weighted_correct": float, "skill_name": str, "category": str, "questions": list}
-        skill_stats: Dict[str, dict] = defaultdict(
+        skill_stats: dict[str, dict] = defaultdict(
             lambda: {
                 "total": 0,
                 "correct": 0,
@@ -139,7 +140,7 @@ class DiagnosticService:
                 question_id=question.id,
                 selected_option_id=selected,
                 is_correct=is_correct,
-                answered_at=datetime.now(timezone.utc),
+                answered_at=datetime.now(UTC),
             )
             answers_to_insert.append(db_answer)
 
@@ -169,7 +170,7 @@ class DiagnosticService:
         self.repo.add_answers(answers_to_insert)
 
         # Generate SkillEvidence and update LearnerSkillStates
-        skill_breakdown: List[SkillScoreBreakdown] = []
+        skill_breakdown: list[SkillScoreBreakdown] = []
 
         for skill_id, stats in skill_stats.items():
             weighted_total = max(stats["weighted_total"], 0.001)
@@ -213,14 +214,12 @@ class DiagnosticService:
             )
 
         # Update attempt completion
-        overall_percentage = round(
-            (overall_correct / max(overall_total, 1)) * 100.0, 1
-        )
+        overall_percentage = round((overall_correct / max(overall_total, 1)) * 100.0, 1)
         attempt.status = "completed"
         attempt.total_questions = overall_total
         attempt.correct_count = overall_correct
         attempt.score_percentage = overall_percentage
-        attempt.completed_at = datetime.now(timezone.utc)
+        attempt.completed_at = datetime.now(UTC)
         self.db.commit()
 
         logger.info(
@@ -246,8 +245,8 @@ class DiagnosticService:
         if not attempt:
             raise EntityNotFoundException("DiagnosticAttempt", attempt_id)
 
-        detailed_answers: List[QuestionAnswerResult] = []
-        skill_stats: Dict[str, dict] = defaultdict(
+        detailed_answers: list[QuestionAnswerResult] = []
+        skill_stats: dict[str, dict] = defaultdict(
             lambda: {
                 "total": 0,
                 "correct": 0,
@@ -345,4 +344,3 @@ class DiagnosticService:
         except Exception as exc:
             logger.warning("Diagnostic questions auto-seed check skipped/failed: %s", exc)
         return False
-

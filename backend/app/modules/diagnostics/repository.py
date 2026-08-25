@@ -1,6 +1,5 @@
 """Database repository for Diagnostic questions, attempts, and answers."""
 
-from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
@@ -21,9 +20,7 @@ class DiagnosticRepository:
         """Return total count of diagnostic questions in database."""
         return self.db.query(DiagnosticQuestion).count()
 
-    def list_active_questions(
-        self, skill_id: Optional[str] = None
-    ) -> List[DiagnosticQuestion]:
+    def list_active_questions(self, skill_id: str | None = None) -> list[DiagnosticQuestion]:
         """Fetch all active diagnostic questions ordered by order_index."""
         stmt = (
             select(DiagnosticQuestion)
@@ -35,7 +32,7 @@ class DiagnosticRepository:
             stmt = stmt.where(DiagnosticQuestion.skill_id == skill_id)
         return list(self.db.scalars(stmt).all())
 
-    def get_question_by_id(self, question_id: str) -> Optional[DiagnosticQuestion]:
+    def get_question_by_id(self, question_id: str) -> DiagnosticQuestion | None:
         """Fetch a single question by its ID."""
         stmt = (
             select(DiagnosticQuestion)
@@ -44,7 +41,7 @@ class DiagnosticRepository:
         )
         return self.db.scalars(stmt).first()
 
-    def get_questions_by_ids(self, question_ids: List[str]) -> List[DiagnosticQuestion]:
+    def get_questions_by_ids(self, question_ids: list[str]) -> list[DiagnosticQuestion]:
         """Fetch multiple questions by IDs."""
         stmt = (
             select(DiagnosticQuestion)
@@ -59,7 +56,7 @@ class DiagnosticRepository:
         self.db.flush()
         return attempt
 
-    def get_attempt_by_id(self, attempt_id: str) -> Optional[DiagnosticAttempt]:
+    def get_attempt_by_id(self, attempt_id: str) -> DiagnosticAttempt | None:
         """Fetch attempt with its answers and associated questions."""
         stmt = (
             select(DiagnosticAttempt)
@@ -73,8 +70,7 @@ class DiagnosticRepository:
         )
         return self.db.scalars(stmt).unique().first()
 
-    def add_answers(self, answers: List[DiagnosticAnswer]) -> None:
+    def add_answers(self, answers: list[DiagnosticAnswer]) -> None:
         """Persist multiple diagnostic answer choices."""
         self.db.add_all(answers)
         self.db.flush()
-

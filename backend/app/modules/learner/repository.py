@@ -1,6 +1,5 @@
 """Database repository for Learner and Skill State entities."""
 
-from typing import List, Optional
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -19,17 +18,17 @@ class LearnerRepository:
         self.db.flush()
         return learner
 
-    def get_learner_by_id(self, learner_id: str) -> Optional[Learner]:
+    def get_learner_by_id(self, learner_id: str) -> Learner | None:
         """Fetch learner by primary ID."""
         stmt = select(Learner).where(Learner.id == learner_id)
         return self.db.scalars(stmt).first()
 
-    def get_learner_by_email(self, email: str) -> Optional[Learner]:
+    def get_learner_by_email(self, email: str) -> Learner | None:
         """Fetch learner by email address."""
         stmt = select(Learner).where(Learner.email == email)
         return self.db.scalars(stmt).first()
 
-    def list_skill_states(self, learner_id: str) -> List[LearnerSkillState]:
+    def list_skill_states(self, learner_id: str) -> list[LearnerSkillState]:
         """Fetch all skill states for a learner."""
         stmt = (
             select(LearnerSkillState)
@@ -39,7 +38,7 @@ class LearnerRepository:
         )
         return list(self.db.scalars(stmt).all())
 
-    def get_skill_state(self, learner_id: str, skill_id: str) -> Optional[LearnerSkillState]:
+    def get_skill_state(self, learner_id: str, skill_id: str) -> LearnerSkillState | None:
         """Fetch specific skill state for a learner."""
         stmt = (
             select(LearnerSkillState)
@@ -60,9 +59,9 @@ class LearnerRepository:
     def list_evidence(
         self,
         learner_id: str,
-        skill_id: Optional[str] = None,
+        skill_id: str | None = None,
         limit: int = 50,
-    ) -> List[SkillEvidence]:
+    ) -> list[SkillEvidence]:
         """Fetch evidence history for a learner ordered by creation time descending."""
         stmt = (
             select(SkillEvidence)
@@ -74,4 +73,3 @@ class LearnerRepository:
         if skill_id:
             stmt = stmt.where(SkillEvidence.skill_id == skill_id)
         return list(self.db.scalars(stmt).all())
-

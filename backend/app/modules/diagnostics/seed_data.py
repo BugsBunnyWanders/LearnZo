@@ -1,8 +1,8 @@
 """Curated diagnostic questions across all 7 backend engineering skills."""
 
-from typing import Any, Dict, List
+from typing import Any
 
-SEEDED_DIAGNOSTIC_QUESTIONS: List[Dict[str, Any]] = [
+SEEDED_DIAGNOSTIC_QUESTIONS: list[dict[str, Any]] = [
     # 1. SQL Fundamentals
     {
         "id": "dq_sql_1",
@@ -403,4 +403,3 @@ SEEDED_DIAGNOSTIC_QUESTIONS: List[Dict[str, Any]] = [
         "order_index": 14,
     },
 ]
-

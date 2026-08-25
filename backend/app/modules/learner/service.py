@@ -1,8 +1,8 @@
 """Learner domain service managing profile creation, evidence recording, and mastery calculations."""
 
 import logging
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundException
@@ -52,7 +52,7 @@ class LearnerService:
                 mastery_score=0.0,
                 confidence_score=0.0,
                 evidence_count=0,
-                last_assessed_at=datetime.now(timezone.utc),
+                last_assessed_at=datetime.now(UTC),
             )
             self.db.add(state)
 
@@ -67,7 +67,7 @@ class LearnerService:
             raise EntityNotFoundException("Learner", learner_id)
 
         skill_states = self.repo.list_skill_states(learner_id)
-        skills_read: List[LearnerSkillStateRead] = []
+        skills_read: list[LearnerSkillStateRead] = []
 
         total_mastery = 0.0
         for st in skill_states:
@@ -99,7 +99,7 @@ class LearnerService:
             recent_evidence=recent_evidence,
         )
 
-    def get_learner_skill_states(self, learner_id: str) -> List[LearnerSkillStateRead]:
+    def get_learner_skill_states(self, learner_id: str) -> list[LearnerSkillStateRead]:
         """Fetch skill states for a learner."""
         learner = self.repo.get_learner_by_id(learner_id)
         if not learner:
@@ -123,11 +123,13 @@ class LearnerService:
     def get_learner_evidence_history(
         self,
         learner_id: str,
-        skill_id: Optional[str] = None,
+        skill_id: str | None = None,
         limit: int = 50,
-    ) -> List[SkillEvidenceRead]:
+    ) -> list[SkillEvidenceRead]:
         """Fetch evidence history for a learner."""
-        evidence_list = self.repo.list_evidence(learner_id=learner_id, skill_id=skill_id, limit=limit)
+        evidence_list = self.repo.list_evidence(
+            learner_id=learner_id, skill_id=skill_id, limit=limit
+        )
         return [
             SkillEvidenceRead(
                 id=ev.id,
@@ -156,7 +158,7 @@ class LearnerService:
         confidence: float,
         evidence_summary: str,
         weight: float = 1.0,
-        metadata_json: Optional[dict] = None,
+        metadata_json: dict | None = None,
     ) -> LearnerSkillState:
         """Add new skill evidence and recompute learner skill mastery state."""
         evidence = SkillEvidence(
@@ -206,7 +208,7 @@ class LearnerService:
             state.confidence_score = min(0.98, state.confidence_score + confidence_gain)
 
         state.evidence_count += 1
-        state.last_assessed_at = datetime.now(timezone.utc)
+        state.last_assessed_at = datetime.now(UTC)
         self.db.commit()
 
         logger.info(
@@ -218,4 +220,3 @@ class LearnerService:
             state.evidence_count,
         )
         return state
-

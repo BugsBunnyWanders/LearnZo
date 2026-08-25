@@ -1,6 +1,5 @@
 """Diagnostic assessment API routes."""
 
-from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
@@ -20,14 +19,14 @@ router = APIRouter(prefix="/diagnostics", tags=["Diagnostics"])
 
 @router.get(
     "/questions",
-    response_model=List[DiagnosticQuestionPublic],
+    response_model=list[DiagnosticQuestionPublic],
     summary="Get Diagnostic Questions",
     description="Retrieve sanitized active diagnostic questions for learner evaluation.",
 )
 def get_diagnostic_questions(
-    skill_id: Optional[str] = Query(default=None, description="Optional skill ID filter"),
+    skill_id: str | None = Query(default=None, description="Optional skill ID filter"),
     db: Session = Depends(get_db),
-) -> List[DiagnosticQuestionPublic]:
+) -> list[DiagnosticQuestionPublic]:
     """List public diagnostic questions."""
     service = DiagnosticService(db)
     return service.list_questions_public(skill_id=skill_id)
@@ -94,4 +93,3 @@ def seed_diagnostic_questions(
     """Seed diagnostic questions."""
     service = DiagnosticService(db)
     return service.seed_questions(force=force)
-

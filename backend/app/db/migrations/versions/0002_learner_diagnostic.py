@@ -5,15 +5,17 @@ Revises: 0001_create_curriculum_tables
 Create Date: 2026-08-25 19:30:00.000000
 
 """
-from typing import Sequence, Union
-from alembic import op
+
+from collections.abc import Sequence
+
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "0002_learner_diagnostic"
-down_revision: Union[str, None] = "0001_create_curriculum_tables"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "0001_create_curriculum_tables"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -23,11 +25,28 @@ def upgrade() -> None:
         sa.Column("id", sa.String(length=50), nullable=False),
         sa.Column("name", sa.String(length=150), nullable=False),
         sa.Column("email", sa.String(length=255), nullable=False),
-        sa.Column("target_role", sa.String(length=100), nullable=False, server_default="Backend SDE2"),
+        sa.Column(
+            "target_role", sa.String(length=100), nullable=False, server_default="Backend SDE2"
+        ),
         sa.Column("target_mastery", sa.Float(), nullable=False, server_default="0.85"),
-        sa.Column("experience_level", sa.String(length=100), nullable=False, server_default="Mid-level SDE"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "experience_level",
+            sa.String(length=100),
+            nullable=False,
+            server_default="Mid-level SDE",
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_learners_email"), "learners", ["email"], unique=True)
@@ -41,16 +60,38 @@ def upgrade() -> None:
         sa.Column("mastery_score", sa.Float(), nullable=False, server_default="0.0"),
         sa.Column("confidence_score", sa.Float(), nullable=False, server_default="0.0"),
         sa.Column("evidence_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("last_assessed_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "last_assessed_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["learner_id"], ["learners.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["skill_id"], ["skills.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("learner_id", "skill_id", name="uq_learner_skill"),
     )
-    op.create_index(op.f("ix_learner_skill_states_learner_id"), "learner_skill_states", ["learner_id"], unique=False)
-    op.create_index(op.f("ix_learner_skill_states_skill_id"), "learner_skill_states", ["skill_id"], unique=False)
+    op.create_index(
+        op.f("ix_learner_skill_states_learner_id"),
+        "learner_skill_states",
+        ["learner_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_learner_skill_states_skill_id"), "learner_skill_states", ["skill_id"], unique=False
+    )
 
     # 3. Create skill_evidence table
     op.create_table(
@@ -65,16 +106,34 @@ def upgrade() -> None:
         sa.Column("weight", sa.Float(), nullable=False, server_default="1.0"),
         sa.Column("evidence_summary", sa.Text(), nullable=False),
         sa.Column("metadata_json", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["learner_id"], ["learners.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["skill_id"], ["skills.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_skill_evidence_learner_id"), "skill_evidence", ["learner_id"], unique=False)
-    op.create_index(op.f("ix_skill_evidence_skill_id"), "skill_evidence", ["skill_id"], unique=False)
-    op.create_index(op.f("ix_skill_evidence_source_type"), "skill_evidence", ["source_type"], unique=False)
-    op.create_index(op.f("ix_skill_evidence_source_id"), "skill_evidence", ["source_id"], unique=False)
+    op.create_index(
+        op.f("ix_skill_evidence_learner_id"), "skill_evidence", ["learner_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_skill_evidence_skill_id"), "skill_evidence", ["skill_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_skill_evidence_source_type"), "skill_evidence", ["source_type"], unique=False
+    )
+    op.create_index(
+        op.f("ix_skill_evidence_source_id"), "skill_evidence", ["source_id"], unique=False
+    )
 
     # 4. Create diagnostic_questions table
     op.create_table(
@@ -89,12 +148,24 @@ def upgrade() -> None:
         sa.Column("explanation", sa.Text(), nullable=False),
         sa.Column("order_index", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["skill_id"], ["skills.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_diagnostic_questions_skill_id"), "diagnostic_questions", ["skill_id"], unique=False)
+    op.create_index(
+        op.f("ix_diagnostic_questions_skill_id"), "diagnostic_questions", ["skill_id"], unique=False
+    )
 
     # 5. Create diagnostic_attempts table
     op.create_table(
@@ -105,15 +176,37 @@ def upgrade() -> None:
         sa.Column("total_questions", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("correct_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("score_percentage", sa.Float(), nullable=False, server_default="0.0"),
-        sa.Column("started_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "started_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["learner_id"], ["learners.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_diagnostic_attempts_learner_id"), "diagnostic_attempts", ["learner_id"], unique=False)
-    op.create_index(op.f("ix_diagnostic_attempts_status"), "diagnostic_attempts", ["status"], unique=False)
+    op.create_index(
+        op.f("ix_diagnostic_attempts_learner_id"),
+        "diagnostic_attempts",
+        ["learner_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_diagnostic_attempts_status"), "diagnostic_attempts", ["status"], unique=False
+    )
 
     # 6. Create diagnostic_answers table
     op.create_table(
@@ -123,15 +216,37 @@ def upgrade() -> None:
         sa.Column("question_id", sa.String(length=50), nullable=False),
         sa.Column("selected_option_id", sa.String(length=10), nullable=False),
         sa.Column("is_correct", sa.Boolean(), nullable=False),
-        sa.Column("answered_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "answered_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["attempt_id"], ["diagnostic_attempts.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["question_id"], ["diagnostic_questions.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_diagnostic_answers_attempt_id"), "diagnostic_answers", ["attempt_id"], unique=False)
-    op.create_index(op.f("ix_diagnostic_answers_question_id"), "diagnostic_answers", ["question_id"], unique=False)
+    op.create_index(
+        op.f("ix_diagnostic_answers_attempt_id"), "diagnostic_answers", ["attempt_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_diagnostic_answers_question_id"),
+        "diagnostic_answers",
+        ["question_id"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
@@ -141,4 +256,3 @@ def downgrade() -> None:
     op.drop_table("skill_evidence")
     op.drop_table("learner_skill_states")
     op.drop_table("learners")
-

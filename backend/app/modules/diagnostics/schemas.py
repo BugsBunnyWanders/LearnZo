@@ -1,7 +1,7 @@
 """Pydantic schemas for Diagnostic assessments, question presentation, and submission results."""
 
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -20,7 +20,7 @@ class DiagnosticQuestionPublic(BaseModel):
     skill_name: str
     question_text: str
     difficulty: str
-    options: List[DiagnosticOptionPublic]
+    options: list[DiagnosticOptionPublic]
     order_index: int
 
     model_config = ConfigDict(from_attributes=True)
@@ -42,7 +42,7 @@ class DiagnosticAttemptRead(BaseModel):
     correct_count: int
     score_percentage: float
     started_at: datetime
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -59,7 +59,7 @@ class DiagnosticAnswerSubmit(BaseModel):
 class DiagnosticSubmissionPayload(BaseModel):
     """Payload containing all submitted question answers for an attempt."""
 
-    answers: List[DiagnosticAnswerSubmit] = Field(
+    answers: list[DiagnosticAnswerSubmit] = Field(
         min_length=1, description="List of question answers"
     )
 
@@ -97,8 +97,8 @@ class DiagnosticResultResponse(BaseModel):
     overall_score_percentage: float
     total_questions: int
     correct_count: int
-    skill_breakdown: List[SkillScoreBreakdown]
-    detailed_answers: List[QuestionAnswerResult]
+    skill_breakdown: list[SkillScoreBreakdown]
+    detailed_answers: list[QuestionAnswerResult]
 
 
 class DiagnosticSeedResponse(BaseModel):
@@ -106,4 +106,3 @@ class DiagnosticSeedResponse(BaseModel):
 
     message: str
     questions_seeded: int
-

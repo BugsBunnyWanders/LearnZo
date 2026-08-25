@@ -16,6 +16,7 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 import app.modules.curriculum.models  # noqa: F401
 import app.modules.diagnostics.models  # noqa: F401
 import app.modules.learner.models  # noqa: F401
+import app.modules.planner.models  # noqa: F401
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import create_application

@@ -2,7 +2,8 @@
 
 import uuid
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any
+
 from sqlalchemy import (
     JSON,
     DateTime,
@@ -43,12 +44,12 @@ class Learner(Base, TimestampMixin):
     )
 
     # Relationships
-    skill_states: Mapped[List["LearnerSkillState"]] = relationship(
+    skill_states: Mapped[list["LearnerSkillState"]] = relationship(
         "LearnerSkillState",
         back_populates="learner",
         cascade="all, delete-orphan",
     )
-    evidence_list: Mapped[List["SkillEvidence"]] = relationship(
+    evidence_list: Mapped[list["SkillEvidence"]] = relationship(
         "SkillEvidence",
         back_populates="learner",
         cascade="all, delete-orphan",
@@ -60,9 +61,7 @@ class LearnerSkillState(Base, TimestampMixin):
     """Current competency state of a learner for a specific skill dimension."""
 
     __tablename__ = "learner_skill_states"
-    __table_args__ = (
-        UniqueConstraint("learner_id", "skill_id", name="uq_learner_skill"),
-    )
+    __table_args__ = (UniqueConstraint("learner_id", "skill_id", name="uq_learner_skill"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     learner_id: Mapped[str] = mapped_column(
@@ -112,7 +111,7 @@ class SkillEvidence(Base, TimestampMixin):
     confidence: Mapped[float] = mapped_column(Float, default=0.8, nullable=False)  # 0.0 - 1.0
     weight: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
     evidence_summary: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata_json: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     learner: Mapped["Learner"] = relationship("Learner", back_populates="evidence_list")
@@ -120,4 +119,3 @@ class SkillEvidence(Base, TimestampMixin):
         "Skill",
         lazy="joined",
     )
-

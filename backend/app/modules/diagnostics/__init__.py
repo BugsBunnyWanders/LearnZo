@@ -7,4 +7,3 @@ from app.modules.diagnostics.models import (
 )
 
 __all__ = ["DiagnosticQuestion", "DiagnosticAttempt", "DiagnosticAnswer"]
-

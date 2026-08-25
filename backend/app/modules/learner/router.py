@@ -1,6 +1,5 @@
 """Learner API endpoints."""
 
-from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
@@ -49,14 +48,14 @@ def get_learner_profile(
 
 @router.get(
     "/{learner_id}/skills",
-    response_model=List[LearnerSkillStateRead],
+    response_model=list[LearnerSkillStateRead],
     summary="Get Learner Skill States",
     description="Retrieve all competency skill mastery scores and confidence estimates for a learner.",
 )
 def get_learner_skills(
     learner_id: str,
     db: Session = Depends(get_db),
-) -> List[LearnerSkillStateRead]:
+) -> list[LearnerSkillStateRead]:
     """Get learner skill states."""
     service = LearnerService(db)
     return service.get_learner_skill_states(learner_id)
@@ -64,17 +63,16 @@ def get_learner_skills(
 
 @router.get(
     "/{learner_id}/evidence",
-    response_model=List[SkillEvidenceRead],
+    response_model=list[SkillEvidenceRead],
     summary="Get Learner Skill Evidence",
     description="Retrieve chronological audit log of skill evidence proving learner competence.",
 )
 def get_learner_evidence(
     learner_id: str,
-    skill_id: Optional[str] = Query(default=None, description="Filter by specific skill ID"),
+    skill_id: str | None = Query(default=None, description="Filter by specific skill ID"),
     limit: int = Query(default=50, ge=1, le=200, description="Max records to return"),
     db: Session = Depends(get_db),
-) -> List[SkillEvidenceRead]:
+) -> list[SkillEvidenceRead]:
     """Get learner skill evidence history."""
     service = LearnerService(db)
     return service.get_learner_evidence_history(learner_id, skill_id=skill_id, limit=limit)
-
