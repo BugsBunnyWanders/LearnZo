@@ -35,4 +35,3 @@ def test_openapi_docs_accessible(client: TestClient) -> None:
     schema = response.json()
     assert schema["info"]["title"] == "LearnZo Backend"
     assert "/api/v1/health" in schema["paths"]
-

@@ -1,7 +1,8 @@
 """Pytest configuration and test fixtures."""
 
 import os
-from typing import Generator
+from collections.abc import Generator
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -12,6 +13,9 @@ from sqlalchemy.pool import StaticPool
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
+import app.modules.curriculum.models  # noqa: F401
+import app.modules.diagnostics.models  # noqa: F401
+import app.modules.learner.models  # noqa: F401
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import create_application
@@ -64,4 +68,3 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
         yield test_client
 
     app.dependency_overrides.clear()
-

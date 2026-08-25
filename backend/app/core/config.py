@@ -1,6 +1,5 @@
 """Application configuration management using Pydantic Settings."""
 
-from typing import List
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,10 +11,12 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
     API_V1_PREFIX: str = "/api/v1"
 
     # CORS configuration
-    CORS_ORIGINS: List[str] = [
+    CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
@@ -42,4 +43,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

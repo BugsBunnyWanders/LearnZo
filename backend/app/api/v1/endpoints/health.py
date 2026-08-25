@@ -1,7 +1,8 @@
 """Health check endpoint handler."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
+from typing import Any
+
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field
 
@@ -15,7 +16,7 @@ class DatabaseHealth(BaseModel):
     """Database connectivity status schema."""
 
     status: str = Field(description="Database connectivity status: 'connected' or 'disconnected'")
-    error: Optional[str] = Field(default=None, description="Error message if disconnected")
+    error: str | None = Field(default=None, description="Error message if disconnected")
 
 
 class HealthResponse(BaseModel):
@@ -36,7 +37,7 @@ class HealthResponse(BaseModel):
     summary="Health Check",
     description="Check the health status of the LearnZo API and database connectivity.",
 )
-def get_health() -> Dict[str, Any]:
+def get_health() -> dict[str, Any]:
     """Retrieve application health status."""
     db_healthy, db_error = check_db_health()
 
@@ -45,10 +46,9 @@ def get_health() -> Dict[str, Any]:
         "project": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(UTC),
         "database": {
             "status": "connected" if db_healthy else "disconnected",
             "error": db_error,
         },
     }
-

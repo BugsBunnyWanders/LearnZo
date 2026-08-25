@@ -2,6 +2,7 @@
 
 import logging
 import sys
+
 from app.core.config import settings
 
 
@@ -20,6 +21,7 @@ def setup_logging() -> None:
     # Set third-party loggers to a reasonable level
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)
     logging.getLogger("sqlalchemy.engine").setLevel(
-        logging.INFO if settings.DEBUG and settings.ENVIRONMENT == "development" else logging.WARNING
+        logging.INFO
+        if settings.DEBUG and settings.ENVIRONMENT == "development"
+        else logging.WARNING
     )
-

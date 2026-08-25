@@ -5,4 +5,3 @@ from app.core.exceptions import LearnZoException
 from app.core.logging import setup_logging
 
 __all__ = ["settings", "setup_logging", "LearnZoException"]
-

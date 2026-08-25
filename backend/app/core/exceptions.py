@@ -1,6 +1,7 @@
 """Custom domain and application exceptions."""
 
-from typing import Any, Dict, Optional
+from typing import Any
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
@@ -12,7 +13,7 @@ class LearnZoException(Exception):
         self,
         message: str,
         status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message)
         self.message = message
@@ -56,4 +57,3 @@ def register_exception_handlers(app: FastAPI) -> None:
                 }
             },
         )
-
